@@ -1,61 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "useClient";
-import {
-  EtherspotBundler,
-  Factory,
-  ModularSdk,
-  WalletProvider,
-  WalletProviderLike,
-  Web3eip1193WalletProvider,
-} from "@etherspot/modular-sdk";
-
+import { EtherspotBundler, Factory, ModularSdk } from "@etherspot/modular-sdk";
+import { WalletProvider } from "@etherspot/modular-sdk/dist/cjs/sdk/wallet/providers/interfaces";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
+import { createWalletClient, custom } from "viem";
+import { polygon } from "viem/chains";
 
 const Login = () => {
   const { login, logout, user, authenticated } = usePrivy();
   const { wallets } = useWallets();
-  // const [provider, setProvider] = useState<any | undefined>(undefined);
-  const [provider, setProvider] = useState<WalletProviderLike | undefined>(
-    undefined
-  );
+  const [provider, setProvider] = useState<any | undefined>(undefined);
   const [etherspotWalletAddress, setEtherspotWalletAddress] = useState("");
-
-  // useEffect(() => {
-  //   if (!wallets.length) return;
-
-  //   // if there is at least one Privy wallet authentificated, we can start find a provider
-  //   const updateProvider = async () => {
-  //     const privyWalletAddress = user?.wallet?.address;
-
-  //     const walletProvider = wallets.find(
-  //       (wallet) => wallet.address === privyWalletAddress
-  //     );
-
-  //     if (walletProvider) {
-  //       const privyProvider = await walletProvider.getEthereumProvider();
-
-  //       // Using the Viem library to create a wallet provider
-  //       const walletClient = createWalletClient({
-  //         account: walletProvider.address as `0x${string}`,
-  //         chain: polygon,
-  //         transport: custom(privyProvider),
-  //       });
-
-  //       setProvider(walletClient);
-  //     }
-  //   };
-
-  //   updateProvider();
-  // }, [wallets, user]);
 
   useEffect(() => {
     if (!wallets.length) return;
 
+    // if there is at least one Privy wallet authentificated, we can start find a provider
     const updateProvider = async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let privyEthereumProvider: any;
-
       const privyWalletAddress = user?.wallet?.address;
 
       const walletProvider = wallets.find(
@@ -63,15 +25,16 @@ const Login = () => {
       );
 
       if (walletProvider) {
-        privyEthereumProvider = await walletProvider.getEthereumProvider();
+        const privyProvider = await walletProvider.getEthereumProvider();
 
-        const newProvider = new Web3eip1193WalletProvider(
-          privyEthereumProvider.walletProvider
-        );
+        // Using the Viem library to create a wallet provider
+        const walletClient = createWalletClient({
+          account: walletProvider.address as `0x${string}`,
+          chain: polygon,
+          transport: custom(privyProvider),
+        });
 
-        await newProvider.refresh();
-
-        setProvider(newProvider);
+        setProvider(walletClient);
       }
     };
 
