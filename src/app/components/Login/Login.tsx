@@ -141,8 +141,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "useClient";
+
 import { EtherspotBundler, Factory, ModularSdk } from "@etherspot/modular-sdk";
-import { WalletProvider } from "@etherspot/modular-sdk/dist/cjs/sdk/wallet/providers/interfaces";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { createSmartAccountClient } from "permissionless";
 import { useEffect, useState } from "react";
@@ -183,7 +183,7 @@ const Login = () => {
   }, [wallets, user]);
 
   const etherspotModularSdkInstatiation = async () => {
-    const etherspotModularSdk = new ModularSdk(provider as WalletProvider, {
+    const etherspotModularSdk = new ModularSdk(provider, {
       chainId: 137, // any chainId compatible with the Modular SDK
       bundlerProvider: new EtherspotBundler(
         137, // any chainId compatible with the Modular SDK
